@@ -304,8 +304,226 @@ Agora, você pode testar as funcionalidades:
 
 Essas ações devem ser refletidas no banco de dados MySQL e na interface do React.
 
-
-
 ### **Conclusão**
 
 Você agora tem um CRUD completo com React no Front-End e Express no Back-End, interagindo com um banco de dados MySQL. Se precisar de melhorias ou personalizações, como validação de formulários ou tratamentos de erro mais avançados, você pode expandir esse código conforme necessário.
+
+
+## Refatorando o Front-End com o Bootstrap 5
+
+### **Passo 1: Adicionar o Bootstrap**
+
+1. No diretório do front-end, adicione o Bootstrap ao projeto:
+
+   - **Opção 1: Usar CDN**  
+     Adicione o seguinte link no `public/index.html`, dentro da tag `<head>`:
+
+     ```html
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+     ```
+
+   - **Opção 2: Instalar via npm**
+     No terminal do front-end, execute:
+
+     ```bash
+     npm install bootstrap
+     ```
+
+     Em seguida, importe o Bootstrap no arquivo `src/index.js`:
+
+     ```javascript
+     import 'bootstrap/dist/css/bootstrap.min.css';
+     ```
+
+### **Passo 2: Refatorar o Layout em `App.js`**
+
+Substitua o conteúdo de `App.js` por este código, que utiliza classes do Bootstrap para um layout mais organizado:
+
+```javascript
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [colaboradores, setColaboradores] = useState([]);
+  const [nome, setNome] = useState('');
+  const [cargo, setCargo] = useState('');
+  const [idade, setIdade] = useState('');
+  const [editId, setEditId] = useState(null);
+
+  const apiUrl = 'http://localhost:5000/colaboradores';
+
+  useEffect(() => {
+    axios.get(apiUrl)
+      .then(response => setColaboradores(response.data))
+      .catch(error => console.error('Erro ao buscar colaboradores', error));
+  }, []);
+
+  const addColaborador = () => {
+    axios.post(apiUrl, { nome, cargo, idade })
+      .then(() => {
+        setNome('');
+        setCargo('');
+        setIdade('');
+        setEditId(null);
+        axios.get(apiUrl).then(response => setColaboradores(response.data));
+      })
+      .catch(error => console.error('Erro ao adicionar colaborador', error));
+  };
+
+  const updateColaborador = () => {
+    axios.put(`${apiUrl}/${editId}`, { nome, cargo, idade })
+      .then(() => {
+        setNome('');
+        setCargo('');
+        setIdade('');
+        setEditId(null);
+        axios.get(apiUrl).then(response => setColaboradores(response.data));
+      })
+      .catch(error => console.error('Erro ao atualizar colaborador', error));
+  };
+
+  const deleteColaborador = (id) => {
+    axios.delete(`${apiUrl}/${id}`)
+      .then(() => axios.get(apiUrl).then(response => setColaboradores(response.data)))
+      .catch(error => console.error('Erro ao deletar colaborador', error));
+  };
+
+  return (
+    <div className="container mt-5">
+      <h1 className="text-center mb-4">Gestão de Colaboradores</h1>
+
+      <div className="card mb-4">
+        <div className="card-header">Adicionar/Editar Colaborador</div>
+        <div className="card-body">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              editId ? updateColaborador() : addColaborador();
+            }}
+          >
+            <div className="row g-3">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  className="form-control"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="Nome"
+                  required
+                />
+              </div>
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  className="form-control"
+                  value={cargo}
+                  onChange={(e) => setCargo(e.target.value)}
+                  placeholder="Cargo"
+                  required
+                />
+              </div>
+              <div className="col-md-4">
+                <input
+                  type="number"
+                  className="form-control"
+                  value={idade}
+                  onChange={(e) => setIdade(e.target.value)}
+                  placeholder="Idade"
+                  required
+                />
+              </div>
+            </div>
+            <div className="mt-3 text-end">
+              <button type="submit" className="btn btn-primary">
+                {editId ? 'Atualizar' : 'Adicionar'}
+              </button>
+              {editId && (
+                <button
+                  type="button"
+                  className="btn btn-secondary ms-2"
+                  onClick={() => {
+                    setNome('');
+                    setCargo('');
+                    setIdade('');
+                    setEditId(null);
+                  }}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <table className="table table-bordered table-striped">
+        <thead>
+          <tr className="table-primary">
+            <th>Nome</th>
+            <th>Cargo</th>
+            <th>Idade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {colaboradores.map((colaborador) => (
+            <tr key={colaborador.id}>
+              <td>{colaborador.nome}</td>
+              <td>{colaborador.cargo}</td>
+              <td>{colaborador.idade}</td>
+              <td>
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => {
+                    setNome(colaborador.nome);
+                    setCargo(colaborador.cargo);
+                    setIdade(colaborador.idade);
+                    setEditId(colaborador.id);
+                  }}
+                >
+                  Editar
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => deleteColaborador(colaborador.id)}
+                >
+                  Deletar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### **Explicação do Layout com Bootstrap**
+
+1. **Estrutura Responsiva**:  
+   A classe `container` centraliza e organiza o conteúdo, enquanto `row` e `col-md-*` dividem a tela em colunas responsivas.
+
+2. **Botões e Formulários**:  
+   Usamos classes como `form-control` para inputs e `btn btn-primary` para botões estilizados.
+
+3. **Tabela Estilizada**:  
+   A tabela utiliza `table`, `table-bordered`, e `table-striped` para uma aparência limpa e profissional.
+
+4. **Cartões (Cards)**:  
+   O formulário foi encapsulado em um card (`card`, `card-header`, e `card-body`) para separá-lo visualmente da tabela.
+
+---
+
+### **Passo 3: Executar o Projeto**
+
+- Certifique-se de que o servidor back-end está rodando (`node server.js`).
+- Inicie o front-end (`npm start`).
+
+A aplicação agora terá um layout estilizado e organizado com **Bootstrap 5**! 🚀 
+
+Se quiser adicionar mais elementos ou personalizações, como um tema de cores, o Bootstrap permite uma customização bastante flexível.
