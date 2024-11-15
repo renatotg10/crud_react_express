@@ -1,4 +1,5 @@
 # CRUD com React e Express
+`Autor: Renato Teixeira Gomes - renatotgomes.dev@gmail.com`
 
 Este é um projeto de CRUD (Create, Read, Update, Delete) utilizando **React** no front-end e **Express** no back-end. O banco de dados utilizado é o **MySQL**.
 
@@ -125,6 +126,10 @@ Sinta-se à vontade para contribuir! Para enviar uma contribuição:
 3. Faça suas alterações e faça commit (`git commit -am 'Adicionando nova funcionalidade'`).
 4. Envie para o seu repositório (`git push origin minha-nova-funcionalidade`).
 5. Abra um Pull Request.
+
+## Documentação do Projeto
+
+Se quiser saber como foi criado esse projeto, verifique a documentação no arquivo `Documentação.md` na raiz desse projeto.
 
 ## Licença
 
