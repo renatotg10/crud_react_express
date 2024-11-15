@@ -43,14 +43,27 @@ npm init -y
 2. **Instalar dependências**:
 
 ```bash
-npm install express mysql2 cors
+npm install express mysql2 cors dotenv
 ```
 
 - `express`: Framework para criar o servidor e rotas.
 - `mysql2`: Pacote para interagir com o banco de dados MySQL.
 - `cors`: Middleware para permitir requisições de diferentes origens.
+- `dotenv`: Biblioteca para carregar variáveis de ambiente de um arquivo .env em seu projeto Node.js.
 
 3. **Criação do arquivo `server.js`**:
+
+Crie o arquivo `.env` e adicione nele as variáveis de ambiente e as informações para acesso ao bando de dados MySQL:
+
+```plaintext
+DB_HOST=localhost
+DB_USER=seu_usuario_mysql
+DB_PASSWORD=sua_senha_mysql
+DB_NAME=nome_do_banco
+PORT=5000
+```
+
+4. **Criação do arquivo `server.js`**:
 
 Crie o arquivo `server.js` para configurar o servidor Express e a conexão com o MySQL.
 
@@ -58,9 +71,16 @@ Crie o arquivo `server.js` para configurar o servidor Express e a conexão com o
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-const port = 5000;
+
+// Carregar variáveis do .env
+const dbHost = process.env.DB_HOST;
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASSWORD;
+const dbName = process.env.DB_NAME;
+const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
@@ -68,41 +88,41 @@ app.use(express.json());
 
 // Configuração do banco de dados
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',   // Alterar conforme necessário
-    password: '',   // Alterar conforme necessário
-    database: 'crud_react_express'
+    host: dbHost,
+    user: dbUser,
+    password: dbPassword,
+    database: dbName
 });
 
 // Conectar ao banco de dados
 db.connect((err) => {
     if (err) {
-        console.error('Erro de conexão:', err);
+        console.error('Erro de conexão: ', err);
     } else {
         console.log('Conectado ao banco de dados');
     }
 });
 
-// CRUD APIs
+// CURD APIs
 
 // Criar novo colaborador
 app.post('/colaboradores', (req, res) => {
     const { nome, cargo, idade } = req.body;
-    const query = 'INSERT INTO colaboradores (nome, cargo, idade) VALUES (?, ?, ?)';
-    
+    const query = 'INSERT INTO colaboradores (nome, cargo, idade) VALUES (?, ?,?)';
+
     db.query(query, [nome, cargo, idade], (err, result) => {
         if (err) {
-            res.status(500).send('Erro ao adicionar colaborador');
+            res.status(500).send('Erro ao adicionar colaborador: ' + err);
         } else {
             res.status(201).send('Colaborador adicionado');
         }
-    });
+    })
 });
 
 // Obter todos os colaboradores
 app.get('/colaboradores', (req, res) => {
     const query = 'SELECT * FROM colaboradores';
-    
+
     db.query(query, (err, results) => {
         if (err) {
             res.status(500).send('Erro ao buscar colaboradores');
@@ -117,10 +137,10 @@ app.put('/colaboradores/:id', (req, res) => {
     const { nome, cargo, idade } = req.body;
     const { id } = req.params;
     const query = 'UPDATE colaboradores SET nome = ?, cargo = ?, idade = ? WHERE id = ?';
-    
+
     db.query(query, [nome, cargo, idade, id], (err, result) => {
         if (err) {
-            res.status(500).send('Erro ao atualizar colaborador');
+            res.status(500).send('Erro ao atualizar colaborador' + err);
         } else {
             res.status(200).send('Colaborador atualizado');
         }
@@ -131,23 +151,23 @@ app.put('/colaboradores/:id', (req, res) => {
 app.delete('/colaboradores/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM colaboradores WHERE id = ?';
-    
+
     db.query(query, [id], (err, result) => {
         if (err) {
-            res.status(500).send('Erro ao deletar colaborador');
+            res.status(500).send('Erro ao deletar colaborador' + err);
         } else {
             res.status(200).send('Colaborador deletado');
         }
     });
 });
 
-// Iniciar o servidor
+// Iniciar servidor
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });
 ```
 
-4. **Inicie o servidor**:
+5. **Inicie o servidor**:
 
 ```bash
 node server.js

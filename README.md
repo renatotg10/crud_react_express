@@ -32,7 +32,7 @@ cd backend
 npm install
 ```
 
-2. Crie um arquivo `.env` na pasta do servidor com as configurações do banco de dados. Exemplo:
+2. Crie o arquivo `.env` e adicione nele as variáveis de ambiente e as informações para acesso ao bando de dados MySQL:
 
 ```plaintext
 DB_HOST=localhost
